@@ -1,3 +1,5 @@
+-- ordinary users tables:
+
 CREATE TABLE user (
     user_id SERIAL PRIMARY KEY,
     full_name VARCHAR(150) NOT NULL,
@@ -53,5 +55,39 @@ CREATE TABLE booth_bookmark (
         FOREIGN KEY (booth_id)
         REFERENCES booth(booth_id)
         ON DELETE CASCADE
+);
+
+-- vip users tables:
+
+CREATE TABLE subscription_plan (
+    plan_id SERIAL PRIMARY KEY,
+
+    name VARCHAR(20) UNIQUE NOT NULL
+        CHECK (name IN ('1_MONTH','3_MONTH','6_MONTH','1_YEAR','LIFETIME')),
+
+    duration_days INT,
+
+    price NUMERIC(12,2) NOT NULL CHECK (price >= 0)
+);
+
+CREATE TABLE vip_subscription (
+    subscription_id SERIAL PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    plan_id INT NOT NULL,
+
+    start_date TIMESTAMP NOT NULL,
+
+    end_date TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (plan_id)
+        REFERENCES subscription_plan(plan_id)
 );
 
