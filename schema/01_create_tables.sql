@@ -61,27 +61,21 @@ CREATE TABLE booth_bookmark (
 
 CREATE TABLE subscription_plan (
     plan_id SERIAL PRIMARY KEY,
-
-    name VARCHAR(20) UNIQUE NOT NULL
-        CHECK (name IN ('1_MONTH','3_MONTH','6_MONTH','1_YEAR','LIFETIME')),
-
+    name VARCHAR(50) UNIQUE NOT NULL,
     duration_days INT,
-
-    price NUMERIC(12,2) NOT NULL CHECK (price >= 0)
+    current_price NUMERIC(12,2) NOT NULL CHECK (current_price >= 0)
 );
 
 CREATE TABLE vip_subscription (
     subscription_id SERIAL PRIMARY KEY,
 
     user_id INT NOT NULL,
-
     plan_id INT NOT NULL,
 
     start_date TIMESTAMP NOT NULL,
-
     end_date TIMESTAMP,
 
-    price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+    price_at_purchase NUMERIC(12,2) NOT NULL CHECK (price_at_purchase >= 0),
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -95,4 +89,61 @@ CREATE TABLE vip_subscription (
         REFERENCES subscription_plan(plan_id)
         ON UPDATE NO ACTION
         ON DELETE RESTRICT
+);
+
+-- product tables:
+
+CREATE TABLE good (
+    good_id SERIAL PRIMARY KEY,
+
+    booth_id INT NOT NULL
+        REFERENCES booth(booth_id)
+        ON DELETE CASCADE,
+
+    title VARCHAR(200) NOT NULL,
+
+    description TEXT,
+
+    image_url TEXT,
+
+    price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE service (
+    service_id SERIAL PRIMARY KEY,
+
+    booth_id INT NOT NULL
+        REFERENCES booth(booth_id)
+        ON DELETE CASCADE,
+
+    title VARCHAR(200) NOT NULL,
+
+    description TEXT,
+
+    image_url TEXT,
+
+    price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+
+    pricing_type VARCHAR(20)
+        CHECK (pricing_type IN ('PER_HOUR','PER_PROJECT')),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE service_schedule (
+    schedule_id SERIAL PRIMARY KEY,
+
+    service_id INT NOT NULL
+        REFERENCES service(service_id)
+        ON DELETE CASCADE,
+
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+
+    is_reserved BOOLEAN DEFAULT FALSE,
+
+    CONSTRAINT chk_service_time
+        CHECK (end_time > start_time)
 );
