@@ -81,13 +81,18 @@ CREATE TABLE vip_subscription (
 
     end_date TIMESTAMP,
 
+    price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id)
+    CONSTRAINT fk_vip_user
+        FOREIGN KEY (user_id)
         REFERENCES users(user_id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (plan_id)
+    CONSTRAINT fk_vip_plan
+        FOREIGN KEY (plan_id)
         REFERENCES subscription_plan(plan_id)
+        ON UPDATE NO ACTION
+        ON DELETE RESTRICT
 );
-
