@@ -17,7 +17,7 @@ CREATE TABLE address (
 
     CONSTRAINT fk_address_user
         FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
+        REFERENCES user(user_id)
         ON DELETE CASCADE
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE product_bookmark (
 
     CONSTRAINT fk_product_bookmark_user
         FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
+        REFERENCES user(user_id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_product_bookmark_product
@@ -48,7 +48,7 @@ CREATE TABLE booth_bookmark (
 
     CONSTRAINT fk_booth_bookmark_user
         FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
+        REFERENCES user(user_id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_booth_bookmark_booth
