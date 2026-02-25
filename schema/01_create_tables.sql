@@ -1,4 +1,4 @@
--- ordinary users tables:
+-- ordinary user tables:
 
 CREATE TABLE user (
     user_id SERIAL PRIMARY KEY,
@@ -57,7 +57,7 @@ CREATE TABLE booth_bookmark (
         ON DELETE CASCADE
 );
 
--- vip users tables:
+-- vip user tables:
 
 CREATE TABLE subscription_plan (
     plan_id SERIAL PRIMARY KEY,
@@ -81,7 +81,7 @@ CREATE TABLE vip_subscription (
 
     CONSTRAINT fk_vip_user
         FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
+        REFERENCES user(user_id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_vip_plan
@@ -154,8 +154,8 @@ CREATE TABLE service_schedule (
     request_id SERIAL PRIMARY KEY,
 
     user_id INT NOT NULL
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
+        REFERENCES user(user_id)
+        ON DELETE RESTRICT,
 
     bank_account VARCHAR(50) NOT NULL,
     payment_receipt_image TEXT,
@@ -165,7 +165,8 @@ CREATE TABLE service_schedule (
         CHECK (status IN ('PENDING','APPROVED','REJECTED')),
 
     reviewed_by INT
-        REFERENCES employee(employee_id),
+        REFERENCES support(support_id)
+        ON DELETE RESTRICT,
 
     reviewed_at TIMESTAMP,
 
@@ -178,14 +179,12 @@ CREATE TABLE booth (
     booth_id SERIAL PRIMARY KEY,
 
     owner_id INT NOT NULL
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
+        REFERENCES user(user_id)
+        ON DELETE RESTRICT,
 
     name VARCHAR(150) NOT NULL,
     description TEXT,
     image_url TEXT,
-
-    is_approved BOOLEAN DEFAULT TRUE,
 
     is_active BOOLEAN DEFAULT TRUE,
     deleted_at TIMESTAMP,
@@ -203,7 +202,7 @@ CREATE TABLE booth_collaboration_request (
         ON DELETE CASCADE,
 
     user_id INT NOT NULL
-        REFERENCES users(user_id)
+        REFERENCES user(user_id)
         ON DELETE CASCADE,
 
     message TEXT,
@@ -212,7 +211,7 @@ CREATE TABLE booth_collaboration_request (
         CHECK (status IN ('PENDING','APPROVED','REJECTED')),
 
     reviewed_by INT
-        REFERENCES employee(employee_id),
+        REFERENCES support(support_id),
 
     reviewed_at TIMESTAMP,
     rejection_reason TEXT,
@@ -226,7 +225,7 @@ CREATE TABLE booth_collaborator (
         ON DELETE CASCADE,
 
     user_id INT
-        REFERENCES users(user_id)
+        REFERENCES user(user_id)
         ON DELETE CASCADE,
 
     can_add_product BOOLEAN DEFAULT FALSE,
@@ -274,4 +273,55 @@ CREATE TABLE golden_booth_subscription (
     CONSTRAINT chk_valid_period
         CHECK (end_date > start_date)
 );
+
+-- support tables:
+
+CREATE TABLE support (
+    support_id SERIAL PRIMARY KEY,
+
+    full_name VARCHAR(150) NOT NULL,
+
+    personnel_code VARCHAR(50) UNIQUE NOT NULL,
+
+    password_hash TEXT NOT NULL,
+
+    image_url TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- badge tables:
+
+CREATE TABLE badge (
+    badge_id SERIAL PRIMARY KEY,
+
+    title VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE booth_badge (
+    booth_id INT NOT NULL
+        REFERENCES booth(booth_id)
+        ON DELETE RESTRICT,
+
+    badge_id INT NOT NULL
+        REFERENCES badge(badge_id)
+        ON DELETE RESTRICT,
+
+    assigned_by INT
+        REFERENCES support(support_id)
+        ON DELETE SET NULL,
+
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+
+    PRIMARY KEY (booth_id, badge_id, start_date),
+
+    CONSTRAINT chk_badge_time
+        CHECK (end_date > start_date)
+);
+
+
 
