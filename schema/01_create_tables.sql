@@ -336,31 +336,51 @@ CREATE TABLE discount (
 
     code VARCHAR(50) UNIQUE NOT NULL,
 
+    discount_kind VARCHAR(20)
+        CHECK (discount_kind IN ('PERCENT','FIXED')) NOT NULL,
+
     value NUMERIC(12,2) NOT NULL CHECK (value > 0),
 
     start_date TIMESTAMP,
     end_date TIMESTAMP,
 
-    max_usage INT,
-    used_count INT DEFAULT 0,
+    max_usage INT CHECK (max_usage IS NULL OR max_usage > 0),
+    used_count INT DEFAULT 0 CHECK (used_count >= 0),
+
+    is_active BOOLEAN DEFAULT TRUE,
 
     created_by INT
         REFERENCES support(support_id)
         ON DELETE SET NULL,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
     CONSTRAINT chk_discount_time
         CHECK (end_date IS NULL OR end_date > start_date)
 );
 
-CREATE TABLE discount_type (
-    discount_id INT NOT NULL
+CREATE TABLE discount_user (
+    discount_id INT
         REFERENCES discount(discount_id)
         ON DELETE CASCADE,
 
-    type VARCHAR(50) NOT NULL,
+    user_id INT
+        REFERENCES user(user_id)
+        ON DELETE CASCADE,
 
-    PRIMARY KEY (discount_id, type)
+    PRIMARY KEY (discount_id, user_id)
+);
+
+CREATE TABLE discount_booth (
+    discount_id INT
+        REFERENCES discount(discount_id)
+        ON DELETE CASCADE,
+
+    booth_id INT
+        REFERENCES booth(booth_id)
+        ON DELETE CASCADE,
+
+    PRIMARY KEY (discount_id, booth_id)
 );
 
 -- subscription plan log tables:
@@ -501,3 +521,14 @@ CREATE TABLE order_item (
     )
 );
 
+CREATE TABLE order_discount (
+    order_id INT UNIQUE
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+
+    discount_id INT
+        REFERENCES discount(discount_id)
+        ON DELETE SET NULL,
+
+    applied_amount NUMERIC(12,2) NOT NULL CHECK (applied_amount >= 0)
+);
