@@ -413,6 +413,12 @@ CREATE TABLE cart (
         REFERENCES user(user_id)
         ON DELETE CASCADE,
 
+    status VARCHAR(20)
+        DEFAULT 'ACTIVE'
+        CHECK (status IN ('ACTIVE','LOCKED')),
+    
+    locked_until TIMESTAMP,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -438,6 +444,50 @@ CREATE TABLE cart_item (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_product_type
+    CHECK (
+        (
+            good_id IS NOT NULL
+            AND schedule_id IS NULL
+        )
+        OR
+        (
+            schedule_id IS NOT NULL
+            AND good_id IS NULL
+        )
+    )
+);
+
+-- locked cart + order tables:
+
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+
+    user_id INT NOT NULL
+        REFERENCES user(user_id),
+
+    total_amount NUMERIC(12,2) NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE order_item (
+    order_item_id SERIAL PRIMARY KEY,
+
+    order_id INT NOT NULL
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+
+    good_id INT
+        REFERENCES good(good_id),
+
+    schedule_id INT
+        REFERENCES service_schedule(schedule_id),
+
+    quantity INT NOT NULL,
+
+    price_at_purchase NUMERIC(12,2) NOT NULL,
+
+    CONSTRAINT chk_order_type
     CHECK (
         (
             good_id IS NOT NULL
