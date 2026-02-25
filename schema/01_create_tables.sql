@@ -356,3 +356,25 @@ CREATE TABLE discount_type (
 
     PRIMARY KEY (discount_id, type)
 );
+
+-- subscription plan log tables:
+
+CREATE TABLE subscription_plan_log (
+    log_id SERIAL PRIMARY KEY,
+
+    plan_id INT NOT NULL
+        REFERENCES subscription_plan(plan_id)
+        ON DELETE CASCADE,
+
+    old_duration_days INT,
+    new_duration_days INT,
+
+    old_price NUMERIC(12,2),
+    new_price NUMERIC(12,2),
+
+    changed_by INT
+        REFERENCES support(support_id)
+        ON DELETE SET NULL,
+
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
