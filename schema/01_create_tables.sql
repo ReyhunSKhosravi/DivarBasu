@@ -187,5 +187,88 @@ CREATE TABLE booth (
 
     is_approved BOOLEAN DEFAULT TRUE,
 
+    is_active BOOLEAN DEFAULT TRUE,
+    deleted_at TIMESTAMP,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- collaborator tables:
+
+CREATE TABLE booth_collaboration_request (
+    request_id SERIAL PRIMARY KEY,
+
+    booth_id INT NOT NULL
+        REFERENCES booth(booth_id)
+        ON DELETE CASCADE,
+
+    user_id INT NOT NULL
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    message TEXT,
+
+    status VARCHAR(20) DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING','APPROVED','REJECTED')),
+
+    reviewed_by INT
+        REFERENCES employee(employee_id),
+
+    reviewed_at TIMESTAMP,
+    rejection_reason TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE booth_collaborator (
+    booth_id INT
+        REFERENCES booth(booth_id)
+        ON DELETE CASCADE,
+
+    user_id INT
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    can_add_product BOOLEAN DEFAULT FALSE,
+    can_edit_all_products BOOLEAN DEFAULT FALSE,
+    can_edit_own_products BOOLEAN DEFAULT FALSE,
+    can_edit_booth_info BOOLEAN DEFAULT FALSE,
+
+    PRIMARY KEY (booth_id, user_id)
+);
+
+
+-- goldeb subscription tables:
+
+CREATE TABLE golden_plan (
+    plan_id SERIAL PRIMARY KEY,
+
+    name VARCHAR(50) UNIQUE NOT NULL,
+
+    duration_days INT NOT NULL CHECK (duration_days > 0),
+
+    current_price NUMERIC(12,2) NOT NULL CHECK (current_price >= 0),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE golden_booth_subscription (
+    subscription_id SERIAL PRIMARY KEY,
+
+    booth_id INT NOT NULL
+        REFERENCES booth(booth_id)
+        ON DELETE NO ACTION,
+
+    plan_id INT NOT NULL
+        REFERENCES golden_plan(plan_id)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION,
+
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_valid_period
+        CHECK (end_date > start_date)
 );
