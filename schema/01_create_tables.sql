@@ -150,7 +150,7 @@ CREATE TABLE service_schedule (
 
 -- seller tables:
 
-CREATE TABLE seller_request (
+‍CREATE TABLE seller_request (
     request_id SERIAL PRIMARY KEY,
 
     user_id INT NOT NULL
@@ -158,9 +158,7 @@ CREATE TABLE seller_request (
         ON DELETE CASCADE,
 
     bank_account VARCHAR(50) NOT NULL,
-
     payment_receipt_image TEXT,
-
     student_card_image TEXT,
 
     status VARCHAR(20) DEFAULT 'PENDING'
@@ -176,24 +174,18 @@ CREATE TABLE seller_request (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE seller (
-    user_id INT PRIMARY KEY
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
-
-    approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE booth (
     booth_id SERIAL PRIMARY KEY,
 
-    seller_id INT NOT NULL
-        REFERENCES seller(user_id)
+    owner_id INT NOT NULL
+        REFERENCES users(user_id)
         ON DELETE CASCADE,
 
     name VARCHAR(150) NOT NULL,
     description TEXT,
     image_url TEXT,
+
+    is_approved BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
