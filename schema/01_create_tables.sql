@@ -147,3 +147,53 @@ CREATE TABLE service_schedule (
     CONSTRAINT chk_service_time
         CHECK (end_time > start_time)
 );
+
+-- seller tables:
+
+CREATE TABLE seller_request (
+    request_id SERIAL PRIMARY KEY,
+
+    user_id INT NOT NULL
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    bank_account VARCHAR(50) NOT NULL,
+
+    payment_receipt_image TEXT,
+
+    student_card_image TEXT,
+
+    status VARCHAR(20) DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING','APPROVED','REJECTED')),
+
+    reviewed_by INT
+        REFERENCES employee(employee_id),
+
+    reviewed_at TIMESTAMP,
+
+    rejection_reason TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE seller (
+    user_id INT PRIMARY KEY
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE booth (
+    booth_id SERIAL PRIMARY KEY,
+
+    seller_id INT NOT NULL
+        REFERENCES seller(user_id)
+        ON DELETE CASCADE,
+
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    image_url TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
