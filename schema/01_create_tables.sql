@@ -189,7 +189,11 @@ CREATE TABLE booth (
     is_active BOOLEAN DEFAULT TRUE,
     deleted_at TIMESTAMP,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    status VARCHAR(20)
+        DEFAULT 'ACTIVE'
+        CHECK (status IN ('ACTIVE','SUSPENDED','DELETED'))
 );
 
 -- collaborator tables:
@@ -377,4 +381,23 @@ CREATE TABLE subscription_plan_log (
         ON DELETE SET NULL,
 
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- booth suspension tables:
+
+CREATE TABLE booth_suspension (
+    suspension_id SERIAL PRIMARY KEY,
+
+    booth_id INT NOT NULL
+        REFERENCES booth(booth_id)
+        ON DELETE CASCADE,
+
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+
+    created_by INT
+        REFERENCES support(support_id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
