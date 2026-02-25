@@ -544,3 +544,103 @@ CREATE TABLE order_discount (
 
     applied_amount NUMERIC(12,2) NOT NULL CHECK (applied_amount >= 0)
 );
+
+-- event logger table:
+
+CREATE TABLE user_event (
+    event_id SERIAL PRIMARY KEY,
+
+    user_id INT
+        REFERENCES user(user_id)
+        ON DELETE CASCADE,
+
+    event_type VARCHAR(30)
+        CHECK (event_type IN (
+            'VISIT_BOOTH',
+            'VISIT_GOOD',
+            'VISIT_SERVICE',
+            'ADD_GOOD_TO_CART',
+            'ADD_SERVICE_TO_CART',
+            'PURCHASE'
+        )) NOT NULL,
+
+    booth_id INT
+        REFERENCES booth(booth_id)
+        ON DELETE SET NULL,
+
+    good_id INT
+        REFERENCES good(good_id)
+        ON DELETE SET NULL,
+
+    service_id INT
+        REFERENCES service(service_id)
+        ON DELETE SET NULL,
+
+    order_id INT
+        REFERENCES orders(order_id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_event_target
+    CHECK (
+        (event_type = 'VISIT_BOOTH' AND booth_id IS NOT NULL AND good_id IS NULL AND service_id IS NULL)
+
+        OR
+
+        (event_type IN ('VISIT_GOOD','ADD_GOOD_TO_CART')
+            AND good_id IS NOT NULL AND service_id IS NULL)
+
+        OR
+
+        (event_type IN ('VISIT_SERVICE','ADD_SERVICE_TO_CART')
+            AND service_id IS NOT NULL AND good_id IS NULL)
+
+        OR
+
+        (event_type = 'PURCHASE' AND order_id IS NOT NULL)
+    )
+);
+
+-- support action logger table:
+
+CREATE TABLE support_action (
+    action_id SERIAL PRIMARY KEY,
+
+    support_id INT NOT NULL
+        REFERENCES support(support_id)
+        ON DELETE CASCADE,
+
+    action_type VARCHAR(50) NOT NULL
+        CHECK (action_type IN (
+            'APPROVE_SELLER',
+            'REJECT_SELLER',
+            'APPROVE_BOOTH',
+            'REJECT_BOOTH',
+            'FLAG_FRAUD',
+            'APPROVE_COLLABORATOR',
+            'REJECT_COLLABORATOR',
+            'APPROVE_DOCUMENT',
+            'REJECT_DOCUMENT'
+        )),
+
+    booth_id INT
+        REFERENCES booth(booth_id)
+        ON DELETE SET NULL,
+
+    user_id INT
+        REFERENCES user(user_id)
+        ON DELETE SET NULL,
+
+    seller_request_id INT
+        REFERENCES seller_request(request_id)
+        ON DELETE SET NULL,
+
+    collaboration_request_id INT
+        REFERENCES booth_collaboration_request(request_id)
+        ON DELETE SET NULL,
+
+    description TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
