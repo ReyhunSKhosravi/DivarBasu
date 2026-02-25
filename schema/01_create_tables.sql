@@ -441,14 +441,12 @@ CREATE TABLE cart_item (
     CHECK (
         (
             good_id IS NOT NULL
-            AND service_id IS NULL
             AND schedule_id IS NULL
         )
         OR
         (
-            service_id IS NOT NULL
+            schedule_id IS NOT NULL
             AND good_id IS NULL
-            AND schedule_id IS NOT NULL
         )
     )
 );
