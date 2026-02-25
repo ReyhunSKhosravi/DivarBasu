@@ -267,8 +267,11 @@ CREATE TABLE golden_booth_subscription (
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
 
+    price_at_purchase NUMERIC(12,2) NOT NULL CHECK (price_at_purchase >= 0),
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_valid_period
         CHECK (end_date > start_date)
 );
+
