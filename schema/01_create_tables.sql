@@ -349,10 +349,22 @@ CREATE TABLE discount (
 
     is_active BOOLEAN DEFAULT TRUE,
 
-    created_by INT
+    created_by_support INT
         REFERENCES support(support_id)
         ON DELETE SET NULL,
 
+    created_by_user INT
+        REFERENCES user(user_id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_creator
+    CHECK (
+        (created_by_support IS NOT NULL AND created_by_user IS NULL)
+        OR
+        (created_by_support IS NULL AND created_by_user IS NOT NULL)
+    ),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_discount_time
