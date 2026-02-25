@@ -108,6 +108,8 @@ CREATE TABLE good (
 
     price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
 
+    stock INT DEFAULT 0 CHECK (stock >= 0),
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -133,7 +135,7 @@ CREATE TABLE service (
 );
 
 CREATE TABLE service_schedule (
-    schedule_id SERIAL PRIMARY KEY,
+    schedule_id SERIAL,
 
     service_id INT NOT NULL
         REFERENCES service(service_id)
@@ -401,3 +403,53 @@ CREATE TABLE booth_suspension (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- cart tables:
+
+CREATE TABLE cart (
+    cart_id SERIAL PRIMARY KEY,
+
+    user_id INT UNIQUE NOT NULL
+        REFERENCES user(user_id)
+        ON DELETE CASCADE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cart_item (
+    cart_item_id SERIAL PRIMARY KEY,
+
+    cart_id INT NOT NULL
+        REFERENCES cart(cart_id)
+        ON DELETE CASCADE,
+
+    good_id INT
+        REFERENCES good(good_id)
+        ON DELETE CASCADE,
+
+    schedule_id INT
+        REFERENCES service_schedule(schedule_id)
+        ON DELETE CASCADE,
+
+
+    quantity INT DEFAULT 1 CHECK (quantity > 0),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_product_type
+    CHECK (
+        (
+            good_id IS NOT NULL
+            AND service_id IS NULL
+            AND schedule_id IS NULL
+        )
+        OR
+        (
+            service_id IS NOT NULL
+            AND good_id IS NULL
+            AND schedule_id IS NOT NULL
+        )
+    )
+);
+
