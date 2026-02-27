@@ -361,7 +361,7 @@ CREATE TABLE discount (
     CHECK (
         (created_by_support IS NOT NULL AND created_by_user IS NULL)
         OR
-        (created_by_support IS NULL AND created_by_user IS NOT NULL)
+        (created_by_support IS NOT NULL AND created_by_user IS NOT NULL)
     ),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -644,18 +644,42 @@ CREATE TABLE support_action (
 );
 
 -- review table:
-
-CREATE TABLE review (
+CREATE TABLE good_review (
     review_id SERIAL PRIMARY KEY,
+
     user_id INT NOT NULL
         REFERENCES user(user_id)
         ON DELETE CASCADE,
-    product_id INT NOT NULL
-        REFERENCES product(product_id)
+
+    good_id INT NOT NULL
+        REFERENCES good(good_id)
         ON DELETE CASCADE,
-    score INT CHECK (score BETWEEN 1 AND 5),
+
+    score INT NOT NULL CHECK (score BETWEEN 1 AND 5),
+
     description TEXT,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, product_id)
+
+    UNIQUE (user_id, good_id)
 );
 
+CREATE TABLE service_review (
+    review_id SERIAL PRIMARY KEY,
+
+    user_id INT NOT NULL
+        REFERENCES user(user_id)
+        ON DELETE CASCADE,
+
+    service_id INT NOT NULL
+        REFERENCES service(service_id)
+        ON DELETE CASCADE,
+
+    score INT NOT NULL CHECK (score BETWEEN 1 AND 5),
+
+    description TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE (user_id, service_id)
+);
