@@ -21,41 +21,20 @@ CREATE TABLE address (
         ON DELETE CASCADE
 );
 
-CREATE TABLE product_bookmark (
-    user_id INT NOT NULL,
-    product_id INT NOT NULL,
+CREATE TABLE good_bookmark (
+    user_id INT REFERENCES user(user_id) ON DELETE CASCADE,
+    good_id INT REFERENCES good(good_id) ON DELETE CASCADE,
     bookmarked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (user_id, product_id),
-
-    CONSTRAINT fk_product_bookmark_user
-        FOREIGN KEY (user_id)
-        REFERENCES user(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_product_bookmark_product
-        FOREIGN KEY (product_id)
-        REFERENCES product(product_id)
-        ON DELETE CASCADE
+    PRIMARY KEY (user_id, good_id)
 );
 
-CREATE TABLE booth_bookmark (
-    user_id INT NOT NULL,
-    booth_id INT NOT NULL,
+CREATE TABLE service_bookmark (
+    user_id INT REFERENCES user(user_id) ON DELETE CASCADE,
+    service_id INT REFERENCES service(service_id) ON DELETE CASCADE,
     bookmarked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (user_id, booth_id),
-
-    CONSTRAINT fk_booth_bookmark_user
-        FOREIGN KEY (user_id)
-        REFERENCES user(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_booth_bookmark_booth
-        FOREIGN KEY (booth_id)
-        REFERENCES booth(booth_id)
-        ON DELETE CASCADE
+    PRIMARY KEY (user_id, service_id)
 );
+
 
 -- vip user tables:
 
@@ -361,8 +340,8 @@ CREATE TABLE discount (
     CHECK (
         (created_by_support IS NOT NULL AND created_by_user IS NULL)
         OR
-        (created_by_support IS NOT NULL AND created_by_user IS NOT NULL)
-    ),
+        (created_by_support IS NULL AND created_by_user IS NOT NULL)),
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_discount_time
