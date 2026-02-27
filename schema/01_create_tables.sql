@@ -135,7 +135,7 @@ CREATE TABLE service (
 );
 
 CREATE TABLE service_schedule (
-    schedule_id SERIAL,
+    schedule_id SERIAL PRIMARY KEY,
 
     service_id INT NOT NULL
         REFERENCES service(service_id)
@@ -356,8 +356,6 @@ CREATE TABLE discount (
     created_by_user INT
         REFERENCES user(user_id)
         ON DELETE SET NULL,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_creator
     CHECK (
@@ -644,3 +642,20 @@ CREATE TABLE support_action (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- review table:
+
+CREATE TABLE review (
+    review_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL
+        REFERENCES user(user_id)
+        ON DELETE CASCADE,
+    product_id INT NOT NULL
+        REFERENCES product(product_id)
+        ON DELETE CASCADE,
+    score INT CHECK (score BETWEEN 1 AND 5),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, product_id)
+);
+
